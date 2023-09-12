@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>This is an HTML page!</title>
+  </head>
+  <body>
+    <template data-name="example-custom-element">
+      <style>
+        p, ::slotted(p) {
+          font-style: italic;
+        }
+      </style>
+      <p>This is a paragraph from the template in example.html</p>
+      <slot></slot>
+    </template>
+    <script>
+      customElements.define('example-custom-element', class extends HTMLElement {
+        constructor() {
+          super()
+          this.attachShadow({ mode: 'open' })
+        }
+
+        connectedCallback() {
+          const template = document.querySelector('template[data-name="example-custom-element"]')
+          this.shadowRoot.append(template.content.cloneNode(true))
+
+          const p = document.createElement('p')
+          p.innerText = 'This is a paragraph from the connectedCallback() in example.html to prove that scripts run'
+          this.shadowRoot.append(p)
+        }
+      })
+    </script>
+  </body>
+</html>

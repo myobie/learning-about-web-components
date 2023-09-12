@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Web Components 1 Demo • Static Image Grid</title>
+    <meta charset="utf-8">
+    <style>
+      :root {
+        --system-ui: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      }
+
+      body {
+        font-family: var(--system-ui);
+      }
+
+      p.desc {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <html-import href="./example.html" runscripts></html-import>
+    <example-custom-element>
+      <p>This is a paragraph from demo.html which should be slotted into the example custom element.</p>
+    </example-custom-element>
+    <hr>
+
+    <p class="desc">The images are randomly sorted and will re-sort every 10 seconds.</p>
+    <image-grid aria-live="polite" role="region" aria-label="Image grid"></image-grid>
+
+    <!-- lib code below -->
+
+    <template data-name="image-grid">
+      <style>
+        :host {
+          box-sizing: border-box;
+          display: grid;
+          gap: 16px;
+          grid-template-columns: 1fr 1fr;
+          margin: 0 auto;
+          max-width: 600px;
+          padding: 20px;
+        }
+      </style>
+
+      <slot></slot>
+    </template>
+
+    <template data-name="image-cell">
+      <style>
+        :host {
+          align-items: center;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          justify-content: center;
+          width: 100%;
+        }
+
+        img {
+          max-width: 100%;
+          width: auto;
+          height: auto;
+          object-fit: contain;
+          overflow: hidden;
+        }
+
+        .name {
+          display: block;
+          min-height: min-content;
+          text-align: center;
+        }
+      </style>
+
+      <img>
+      <p class="name"></p>
+    </template>
+    <script type="module" src="./demo.js"></script>
+  </body>
+</html>
