@@ -14,7 +14,7 @@ export class HTMLImport extends HTMLElement {
 
   attributeChangedCallback(name, _oldValue, newValue) {
     if (name !== 'href') { return }
-    return this.#doFetch(newValue)
+    this.#doFetch(newValue)
   }
 
   #clear() {
@@ -22,15 +22,20 @@ export class HTMLImport extends HTMLElement {
     while(this.shadowRootfirstChild) this.removeChild(this.shadowRoot.lastChild)
   }
 
-  async #doFetch(href) {
+  #doFetch(href) {
     if (!href) {
       this.#clear()
       return
     }
 
     const parser = new DOMParser()
-    const response = await fetch(href)
-    const text = await response.text()
+
+    // NOTE: doing a synchronous request for testing 🤔
+    const request = new XMLHttpRequest()
+    request.open("GET", href, false)
+    request.send(null)
+
+    const text = request.responseText
     const doc = parser.parseFromString(text, 'text/html')
 
     const template = document.createElement('template')
