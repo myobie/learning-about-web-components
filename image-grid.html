@@ -32,6 +32,14 @@
           super()
           this.#internals = this.attachInternals()
 
+          // Hydrating this element is complex because we want manual slot
+          // assignment, but that cannot be expressed declarativly yet. We also
+          // cannot remove a shadowRoot from an element, so we completely start
+          // over and replace this element. To do this replacement in the least
+          // disruptive way, we move all the current light dom and shadow dom
+          // elements over to a new element with the correct slotAssignment of
+          // manual.
+
           if (this.#internals.shadowRoot) {
             if (this.#internals.shadowRoot.slotAssignment !== 'manual') {
               requestAnimationFrame(() => {
@@ -46,9 +54,6 @@
                 }
 
                 const slot = upgradeGrid.shadowRoot.querySelector('slot')
-
-                // we are doing all this work just for this, we cannot
-                // declaratively say the slot assignment is manual yet
                 slot.assign(...nodesToAssign)
                 this.replaceWith(upgradeGrid)
               })
@@ -64,6 +69,8 @@
           const slot = this.shadowRoot.querySelector('slot')
           const currentNodes = Array.from(slot.assignedNodes())
 
+          // If we don't have recordIds but we do have slotted nodes, then let
+          // the order of those nodes be our recordIds
           if (currentNodes.length > 0 && this.#recordIds.length === 0) {
             this.#recordIds = currentNodes.map(n => n.recordId)
           } else {
@@ -94,7 +101,7 @@
             }
           }
 
-          // should probably cleanup old images that aren't visible anymore
+          // should probably cleanup old images that aren't visible anymore for the filtering use case
 
           slot.assign(...newNodes)
         }
