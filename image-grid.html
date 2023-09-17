@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Image Grid Component</title>
+  </head>
+  <body>
+    <template data-name="image-grid">
+      <style>
+        :host {
+          box-sizing: border-box;
+          display: grid;
+          gap: 16px;
+          grid-template-columns: 1fr 1fr;
+          margin: 0 auto;
+          max-width: 600px;
+          padding: 20px;
+        }
+      </style>
+
+      <slot></slot>
+    </template>
+    <script type="module">
+      class ImageGrid extends HTMLElement {
+        static {
+          customElements.define('image-grid', this)
+        }
+
+        #recordIds = []
+        #internals = null
+
+        constructor() {
+          super()
+          this.#internals = this.attachInternals()
+
+          if (this.#internals.shadowRoot) {
+            if (this.#internals.shadowRoot.slotAssignment !== 'manual') {
+              requestAnimationFrame(() => {
+                // cannot make another ImageGrid when the first ImageGrid hasn't finished it's constructor()
+                const upgradeGrid = document.createElement('image-grid')
+                const nodesToAssign = []
+
+                while (this.firstElementChild) {
+                  const el = this.firstElementChild
+                  upgradeGrid.appendChild(el)
+                  nodesToAssign.push(el)
+                }
+
+                const slot = upgradeGrid.shadowRoot.querySelector('slot')
+
+                // we are doing all this work just for this, we cannot
+                // declaratively say the slot assignment is manual yet
+                slot.assign(...nodesToAssign)
+                this.replaceWith(upgradeGrid)
+              })
+            }
+          } else {
+            this.attachShadow({ mode: 'open', slotAssignment: 'manual' })
+            const template = document.querySelector('template[data-name="image-grid"]')
+            this.#internals.shadowRoot.append(template.content.cloneNode(true))
+          }
+        }
+
+        connectedCallback() {
+          const slot = this.shadowRoot.querySelector('slot')
+          const currentNodes = Array.from(slot.assignedNodes())
+
+          if (currentNodes.length > 0 && this.#recordIds.length === 0) {
+            this.#recordIds = currentNodes.map(n => n.recordId)
+          } else {
+            this.updateTemplate()
+          }
+        }
+
+        updateTemplate() {
+          if (this.#recordIds.length === 0) {
+            // still waiting on the first db query
+            return
+          }
+
+          const slot = this.shadowRoot.querySelector('slot')
+          const currentNodes = Array.from(slot.assignedNodes())
+          const newNodes = []
+
+          for (const recordId of this.#recordIds) {
+            const currentNode = currentNodes.find(n => n.recordId === recordId)
+
+            if (currentNode) {
+              newNodes.push(currentNode)
+            } else {
+              const newNode = document.createElement('image-cell')
+              newNode.recordId = recordId
+              this.append(newNode) // can only slot elements that are in the shadowRoot's host node
+              newNodes.push(newNode)
+            }
+          }
+
+          // should probably cleanup old images that aren't visible anymore
+
+          slot.assign(...newNodes)
+        }
+
+        get recordIds() {
+          return Array.from(this.#recordIds)
+        }
+
+        set recordIds(newImageIds) {
+          this.#recordIds = Array.from(newImageIds)
+          this.updateTemplate()
+        }
+      }
+    </script>
+  </body>
+</html>

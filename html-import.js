@@ -1,3 +1,11 @@
+export function importHTML(href, opts = {}) {
+  const el = document.createElement('html-import')
+  if (opts.runScripts) { el.setAttribute('runscripts', '') }
+  if (opts.async) { el.setAttribute('async', '') }
+  el.setAttribute('href', href)
+  document.body.append(el)
+}
+
 export class HTMLImport extends HTMLElement {
   static {
     customElements.define('html-import', this)
@@ -22,20 +30,25 @@ export class HTMLImport extends HTMLElement {
     while(this.shadowRootfirstChild) this.removeChild(this.shadowRoot.lastChild)
   }
 
-  #doFetch(href) {
+  async #doFetch(href) {
     if (!href) {
       this.#clear()
       return
     }
 
     const parser = new DOMParser()
+    let text = ''
 
-    // NOTE: doing a synchronous request for testing 🤔
-    const request = new XMLHttpRequest()
-    request.open("GET", href, false)
-    request.send(null)
+    if (this.getAttribute('async') === null && 'XMLHttpRequest' in globalThis) {
+      const request = new XMLHttpRequest()
+      request.open("GET", href, false)
+      request.send(null)
+      text = request.responseText
+    } else {
+      const response = await fetch(href)
+      text = await response.text()
+    }
 
-    const text = request.responseText
     const doc = parser.parseFromString(text, 'text/html')
 
     const template = document.createElement('template')
