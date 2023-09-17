@@ -1,38 +1,42 @@
 import { db } from './db.js'
-import { html } from './template.js'
+import { createHTML } from './template.js'
 
 export class ImageCell extends HTMLElement {
-  static template = html`
-    <style>
-      :host {
-        align-items: center;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        justify-content: center;
-        width: 100%;
-      }
+  static template = null
 
-      img {
-        max-width: 100%;
-        width: auto;
-        height: auto;
-        object-fit: contain;
-        overflow: hidden;
-      }
+  static define(registry = customElements, body = document.body) {
+    const html = createHTML(body.getRootNode())
 
-      .name {
-        display: block;
-        min-height: min-content;
-        text-align: center;
-      }
-    </style>
+    this.template = html`
+      <style>
+        :host {
+          align-items: center;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          justify-content: center;
+          width: 100%;
+        }
 
-    <img>
-    <p class="name"></p>
-  `
+        img {
+          max-width: 100%;
+          width: auto;
+          height: auto;
+          object-fit: contain;
+          overflow: hidden;
+        }
 
-  static define(registry = customElements) {
+        .name {
+          display: block;
+          min-height: min-content;
+          text-align: center;
+        }
+      </style>
+
+      <img>
+      <p class="name"></p>
+    `
+
     registry.define('image-cell', this)
   }
 

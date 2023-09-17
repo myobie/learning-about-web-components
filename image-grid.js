@@ -1,23 +1,27 @@
-import { html } from './template.js'
+import { createHTML } from './template.js'
 
 export class ImageGrid extends HTMLElement {
-  static template = html`
-    <style>
-      :host {
-        box-sizing: border-box;
-        display: grid;
-        gap: 16px;
-        grid-template-columns: 1fr 1fr;
-        margin: 0 auto;
-        max-width: 600px;
-        padding: 20px;
-      }
-    </style>
-    <slot></slot>
-  `
+  static template = null
 
-  static define() {
-    customElements.define('image-grid', this)
+  static define(registry = globalThis.customElements, body = document.body) {
+    const html = createHTML(body.getRootNode())
+
+    this.template = html`
+      <style>
+        :host {
+          box-sizing: border-box;
+          display: grid;
+          gap: 16px;
+          grid-template-columns: 1fr 1fr;
+          margin: 0 auto;
+          max-width: 600px;
+          padding: 20px;
+        }
+      </style>
+      <slot></slot>
+    `
+
+    registry.define('image-grid', this)
   }
 
   #recordIds = []
@@ -39,7 +43,7 @@ export class ImageGrid extends HTMLElement {
       if (this.#internals.shadowRoot.slotAssignment !== 'manual') {
         requestAnimationFrame(() => {
           // cannot make another ImageGrid when the first ImageGrid hasn't finished it's constructor()
-          const upgradeGrid = document.createElement('image-grid')
+          const upgradeGrid = this.getRootNode().createElement('image-grid')
           const nodesToAssign = []
 
           while (this.firstElementChild) {
@@ -88,7 +92,7 @@ export class ImageGrid extends HTMLElement {
       if (currentNode) {
         newNodes.push(currentNode)
       } else {
-        const newNode = document.createElement('image-cell')
+        const newNode = this.getRootNode().createElement('image-cell')
         newNode.recordId = recordId
         this.append(newNode) // can only slot elements that are in the shadowRoot's host node
         newNodes.push(newNode)
