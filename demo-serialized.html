@@ -16,13 +16,11 @@
         text-align: center;
       }
     </style>
-    <script type="module" src="./html-import.js"></script>
     <script type="module" src="./demo.js" defer></script>
+    <script type="module" src="./image-cell.js" defer></script>
+    <script type="module" src="./image-grid.js" defer></script>
   </head>
   <body data-ssr>
-    <html-import href="./image-grid.html" async runscripts></html-import>
-    <html-import href="./image-cell.html" async runscripts></html-import>
-
     <p class="desc">The images are randomly sorted and will re-sort every 10 seconds.</p>
 
     <image-grid aria-live="polite" role="region" aria-label="Image grid">

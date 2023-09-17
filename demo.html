@@ -15,20 +15,21 @@
       p.desc {
         text-align: center;
       }
+
+      image-grid:not(:defined),
+      image-cell:not(:defined) {
+        display: none;
+      }
     </style>
-    <script type="module" src="./html-import.js"></script>
     <script type="module" src="./demo.js" defer></script>
+    <script type="module" src="./image-cell.js" defer></script>
+    <script type="module" src="./image-grid.js" defer></script>
   </head>
   <body>
-    <html-import href="./image-grid.html" async runscripts></html-import>
-    <html-import href="./image-cell.html" async runscripts></html-import>
-
-    <div id=test>
     <p class="desc">The images are randomly sorted and will re-sort every 10 seconds.</p>
 
     <image-grid aria-live="polite" role="region" aria-label="Image grid">
-      <p>This is in the light dom</p>
+      <p>This is in the source light dom and won't ever show up becuase the slot assignment mode is manual.</p>
     </image-grid>
-    </div>
   </body>
 </html>
