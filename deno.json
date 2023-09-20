@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "useUnknownInCatchVariables": true
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no-extra-semi"],
+      "include": ["no-non-null-assertion"]
+    }
+  },
+  "fmt": {
+    "files": {
+      "exclude": ["./"]
+    }
+  }
+}

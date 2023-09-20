@@ -26,10 +26,15 @@ export class ImageGrid extends HTMLElement {
 
   #recordIds = []
   #internals = null
+  #shadowRoot = null
 
   constructor() {
     super()
-    this.#internals = this.attachInternals()
+
+    if ('attachInternals' in this) {
+      this.#internals = this.attachInternals()
+      this.#shadowRoot = this.#internals.shadowRoot
+    }
 
     // Hydrating this element is complex because we want manual slot
     // assignment, but that cannot be expressed declarativly yet. We also
@@ -39,8 +44,8 @@ export class ImageGrid extends HTMLElement {
     // elements over to a new element with the correct slotAssignment of
     // manual.
 
-    if (this.#internals.shadowRoot) {
-      if (this.#internals.shadowRoot.slotAssignment !== 'manual') {
+    if (this.#shadowRoot) {
+      if (this.#shadowRoot.slotAssignment !== 'manual') {
         requestAnimationFrame(() => {
           // cannot make another ImageGrid when the first ImageGrid hasn't finished it's constructor()
           const upgradeGrid = this.getRootNode().createElement('image-grid')
@@ -58,14 +63,19 @@ export class ImageGrid extends HTMLElement {
         })
       }
     } else {
-      this.attachShadow({ mode: 'open', slotAssignment: 'manual' })
-      this.#internals.shadowRoot.append(this.constructor.template.cloneNode())
+      this.#shadowRoot = this.attachShadow({ mode: 'open', slotAssignment: 'manual' })
+      this.#shadowRoot.append(this.constructor.template.cloneNode())
     }
   }
 
   connectedCallback() {
-    const slot = this.#internals.shadowRoot.querySelector('slot')
-    const currentNodes = Array.from(slot.assignedNodes())
+    const slot = this.#shadowRoot.querySelector('slot')
+
+    let currentNodes = []
+
+    if ('assignedNodes' in slot && this.#shadowRoot.slotAssignment === 'manual') {
+      currentNodes = slot.assignedNodes()
+    }
 
     // If we don't have recordIds but we do have slotted nodes, then let
     // the order of those nodes be our recordIds
@@ -82,7 +92,7 @@ export class ImageGrid extends HTMLElement {
       return
     }
 
-    const slot = this.#internals.shadowRoot.querySelector('slot')
+    const slot = this.#shadowRoot.querySelector('slot')
     const currentNodes = Array.from(slot.assignedNodes())
     const newNodes = []
 

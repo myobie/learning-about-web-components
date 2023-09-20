@@ -20,7 +20,7 @@ const voidElementNames = [
 // elements enough time to fully setup
 
 // generator function to support streaming responses
-function *serializer (node, opts = {}) {
+export function* serializer(node, opts = {}) {
   const closedRoots = opts.closedRoots || []
   let closedRootsMap = new WeakMap()
 
@@ -42,14 +42,14 @@ function *serializer (node, opts = {}) {
   }
 
   // This is very naive
-  const attributesArray = Array.from(attributes.entries()).map(([k,v]) => `${k}="${v}"`)
+  const attributesArray = Array.from(attributes.entries()).map(([k, v]) => `${k}="${v}"`)
   const attributesString = attributesArray.length > 0 ? ` ${attributesArray.join(' ')}` : ''
 
   // yield this node's tag name + attributes
   // This probably only works for simple HTML5 and I'm OK with that for now
   yield `<${tagName}${attributesString}>`
 
-  function *serializeChildrenOfNode(parent) {
+  function* serializeChildrenOfNode(parent) {
     // find it's first child
     let child = parent.firstChild
 
@@ -60,13 +60,13 @@ function *serializer (node, opts = {}) {
     }
   }
 
-  function *serializeAssignedNodesOfSlot(slot) {
+  function* serializeAssignedNodesOfSlot(slot) {
     for (const child of slot.assignedNodes()) {
       yield* serializeChild(child)
     }
   }
 
-  function *serializeChild(child) {
+  function* serializeChild(child) {
     if (child.nodeType === 1) {
       yield* serializer(child, closedRootsMap)
     } else if (child.nodeType === 3) {
@@ -112,7 +112,7 @@ function *serializer (node, opts = {}) {
   }
 }
 
-function serialize(node) {
+export function serialize(node) {
   return Array.from(serializer(node)).join('')
 }
 

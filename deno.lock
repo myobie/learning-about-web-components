@@ -1,0 +1,18 @@
+{
+  "version": "2",
+  "remote": {
+    "https://esm.sh/linkedom@0.15.3/worker": "5d1d6663548d6434a365682bc687ae4385fc49c2ca6b01704c7f5f8391cfb6b7",
+    "https://esm.sh/v132/linkedom@0.15.3/denonext/worker.js": "85a71792f188585ded5c66657bfec1fd0c61218613192ed00641fbfd671833f7"
+  },
+  "npm": {
+    "specifiers": {
+      "@types/node": "@types/node@18.16.19"
+    },
+    "packages": {
+      "@types/node@18.16.19": {
+        "integrity": "sha512-IXl7o+R9iti9eBW4Wg2hx1xQDig183jj7YLn8F7udNceyfkbn1ZxmzZXuak20gR40D7pIkIY1kYGx5VIGbaHKA==",
+        "dependencies": {}
+      }
+    }
+  }
+}
