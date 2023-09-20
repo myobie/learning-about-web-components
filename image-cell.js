@@ -1,48 +1,43 @@
 import { db } from './db.js'
-import { createHTML } from './template.js'
+import { html } from './template.js'
 
 export class ImageCell extends HTMLElement {
-  static template = null
+  static template = html`
+    <style>
+      :host {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: center;
+        width: 100%;
+      }
 
-  static define(registry = customElements, body = document.body) {
-    const html = createHTML(body.getRootNode())
+      img {
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        overflow: hidden;
+      }
 
-    this.template = html`
-      <style>
-        :host {
-          align-items: center;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          justify-content: center;
-          width: 100%;
-        }
+      .name {
+        display: block;
+        min-height: min-content;
+        text-align: center;
+      }
+    </style>
 
-        img {
-          max-width: 100%;
-          width: auto;
-          height: auto;
-          object-fit: contain;
-          overflow: hidden;
-        }
+    <img>
+    <p class="name"></p>
+  `
 
-        .name {
-          display: block;
-          min-height: min-content;
-          text-align: center;
-        }
-      </style>
-
-      <img>
-      <p class="name"></p>
-    `
-
-    registry.define('image-cell', this)
-  }
+  static reg = customElements.define('image-cell', this)
 
   #recordId = null
   #lastRenderedRecordId = null
   #internals = null
+  #shadowRoot = null
 
   static get observedAttributes() {
     return ['record-id']
@@ -50,10 +45,14 @@ export class ImageCell extends HTMLElement {
 
   constructor() {
     super()
-    this.#internals = this.attachInternals()
 
-    if (!this.#internals.shadowRoot) {
-      this.attachShadow({ mode: 'open' })
+    if ('attachInternals' in this) {
+      this.#internals = this.attachInternals()
+      this.#shadowRoot = this.#internals.shadowRoot
+    }
+
+    if (!this.#shadowRoot) {
+      this.#shadowRoot = this.attachShadow({ mode: 'open' })
     }
   }
 
@@ -89,7 +88,11 @@ export class ImageCell extends HTMLElement {
 
     // only update if it’s a different recordId
     if (record?.id !== this.#lastRenderedRecordId) {
-      this.#internals.shadowRoot.replaceChildren() // clear
+      // while (this.#shadowRoot.firstElementChild) {
+      //   this.#shadowRoot.removeChild(this.#shadowRoot.firstElementChild)
+      // }
+
+      this.#shadowRoot.replaceChildren() // clear
 
       if (record) {
         // we will only ever see this log once, since we don't update these
@@ -97,10 +100,10 @@ export class ImageCell extends HTMLElement {
         // the slot in image-grid
         console.debug(`rendering image-cell for image ${record.id}`)
 
-        this.#internals.shadowRoot.append(this.constructor.template.cloneNode())
+        this.#shadowRoot.append(this.constructor.template.cloneNode())
 
-        const img = this.#internals.shadowRoot.querySelector('img')
-        const pName = this.#internals.shadowRoot.querySelector('p.name')
+        const img = this.#shadowRoot.querySelector('img')
+        const pName = this.#shadowRoot.querySelector('p.name')
 
         img.alt = record.description
         img.src = record.src
@@ -108,7 +111,7 @@ export class ImageCell extends HTMLElement {
         img.height = record.height
 
         const nameParts = record.src.split('/')
-        pName.innerText = nameParts.at(-1)
+        pName.innerHTML = nameParts.at(-1)
       }
     }
 

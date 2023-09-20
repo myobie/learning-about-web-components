@@ -21,15 +21,13 @@
         display: none;
       }
     </style>
-    <script type="module" src="./demo.js" defer></script>
-    <script type="module" src="./image-cell.js" defer></script>
-    <script type="module" src="./image-grid.js" defer></script>
+    <script type="module" src="./demo.js" defer data-ssr></script>
   </head>
   <body>
     <p class="desc">The images are randomly sorted and will re-sort every 10 seconds.</p>
 
     <image-grid aria-live="polite" role="region" aria-label="Image grid">
-      <p>This is in the source light dom and won't ever show up becuase the slot assignment mode is manual.</p>
+      <p>This is in the source light dom.</p>
     </image-grid>
   </body>
 </html>

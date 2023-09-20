@@ -98,7 +98,9 @@ export function* serializer(node, opts = {}) {
     }
 
     // yield everything currently inside the shadow root inside a declarative shadow root template
-    yield `<template shadowrootmode="${shadow.mode}">\n`
+    yield `<template shadowrootmode="${
+      shadow.mode || closedRootsMap.get(node) ? 'closed' : 'open'
+    }">\n`
     yield* serializeChildrenOfNode(shadow)
     yield `</template>\n`
   } else {
@@ -116,5 +118,5 @@ export function serialize(node) {
   return Array.from(serializer(node)).join('')
 }
 
-window.serializer = serializer
-window.serialize = serialize
+// window.serializer = serializer
+// window.serialize = serialize

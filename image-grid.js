@@ -1,32 +1,27 @@
-import { createHTML } from './template.js'
+import { html } from './template.js'
 
 export class ImageGrid extends HTMLElement {
-  static template = null
+  static template = html`
+    <style>
+      :host {
+        box-sizing: border-box;
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 1fr 1fr;
+        margin: 0 auto;
+        max-width: 600px;
+        padding: 20px;
+      }
+    </style>
+    <slot></slot>
+  `
 
-  static define(registry = globalThis.customElements, body = document.body) {
-    const html = createHTML(body.getRootNode())
-
-    this.template = html`
-      <style>
-        :host {
-          box-sizing: border-box;
-          display: grid;
-          gap: 16px;
-          grid-template-columns: 1fr 1fr;
-          margin: 0 auto;
-          max-width: 600px;
-          padding: 20px;
-        }
-      </style>
-      <slot></slot>
-    `
-
-    registry.define('image-grid', this)
-  }
+  static reg = customElements.define('image-grid', this)
 
   #recordIds = []
   #internals = null
   #shadowRoot = null
+  #canAssign = false
 
   constructor() {
     super()
@@ -70,10 +65,11 @@ export class ImageGrid extends HTMLElement {
 
   connectedCallback() {
     const slot = this.#shadowRoot.querySelector('slot')
+    this.#canAssign = 'assignedNodes' in slot && this.#shadowRoot.slotAssignment === 'manual'
 
     let currentNodes = []
 
-    if ('assignedNodes' in slot && this.#shadowRoot.slotAssignment === 'manual') {
+    if (this.#canAssign) {
       currentNodes = slot.assignedNodes()
     }
 
@@ -93,7 +89,15 @@ export class ImageGrid extends HTMLElement {
     }
 
     const slot = this.#shadowRoot.querySelector('slot')
-    const currentNodes = Array.from(slot.assignedNodes())
+
+    let currentNodes = []
+
+    if (this.#canAssign) {
+      currentNodes = Array.from(slot.assignedNodes())
+    } else {
+      currentNodes = Array.from(this.children)
+    }
+
     const newNodes = []
 
     for (const recordId of this.#recordIds) {
@@ -111,7 +115,17 @@ export class ImageGrid extends HTMLElement {
 
     // should probably cleanup old images that aren't visible anymore for the filtering use case
 
-    slot.assign(...newNodes)
+    if (this.#canAssign) {
+      slot.assign(...newNodes)
+    } else {
+      while (this.firstElementChild) {
+        this.removeChild(this.firstElementChild)
+      }
+
+      for (const node of newNodes) {
+        this.append(node)
+      }
+    }
   }
 
   get recordIds() {
