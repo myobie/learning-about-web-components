@@ -117,6 +117,3 @@ export function* serializer(node, opts = {}) {
 export function serialize(node) {
   return Array.from(serializer(node)).join('')
 }
-
-// window.serializer = serializer
-// window.serialize = serialize

@@ -2,6 +2,9 @@
   "compilerOptions": {
     "useUnknownInCatchVariables": true
   },
+  "imports": {
+    "linkedom": "https://esm.sh/linkedom@0.15.3/worker"
+  },
   "lint": {
     "rules": {
       "tags": ["recommended"],

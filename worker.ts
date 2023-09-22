@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import { parseHTML } from 'https://esm.sh/linkedom@0.15.3/worker'
+import { parseHTML } from 'linkedom'
 import { serializer } from './serializer.js'
 import { type Output, type SerializeRequest } from './types.ts'
 

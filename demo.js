@@ -8,7 +8,7 @@ async function boot() {
   // We test for the shadowRootMode property becuase Firefox doesn't support
   // declarative shadow dom yet, so we must act like all that SSR'ed stuff isn't
   // there with Firefox
-  const isSSR = !!document.body.hasAttribute('data-ssr')
+  const isSSRed = !!document.body.hasAttribute('data-ssr')
     && HTMLTemplateElement.prototype.hasOwnProperty('shadowRootMode')
 
   const workLoop = delay => ({
@@ -19,8 +19,8 @@ async function boot() {
 
       return {
         async next() {
-          if (isSSR && iteration === 0) {
-            // don't resort right after hydration
+          if (isSSRed && iteration === 0) {
+            // don't re-sort right after hydration
             await wait(delay)
           }
 
@@ -38,8 +38,8 @@ async function boot() {
   for await (const _ of workLoop(10000)) { /* no op */ }
 }
 
-if (self.Deno) {
-  await import('./worker-data.ts')
+if (self.Deno || self.Bun) {
+  await import('./ssr-data.ts')
 } else {
   boot()
 }
