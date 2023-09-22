@@ -9,19 +9,35 @@ onmessage = e => {
   perform(data)
 }
 
+function wrapElement(markup: string): string {
+  return `<!doctype html>
+          <html>
+            <head><title>Blank</title>
+            <body>
+              ${markup}
+            </body>
+          </html>`
+}
+
 async function perform(req: SerializeRequest) {
   // SEE: https://github.com/thepassle/custom-elements-ssr/blob/master/server-shim.js
+
+  let markup = ''
+  let isElement = false
+
+  if ('page' in req) {
+    markup = req.page
+  } else {
+    isElement = true
+    markup = wrapElement(req.element)
+  }
 
   const {
     window,
     document,
     customElements,
     HTMLElement
-  } = parseHTML(`<!doctype html>
-              <html>
-                <head><title>Blank</title>
-                ${req.body}
-              </html>`)
+  } = parseHTML(markup)
 
   globalThis.window = window
 
@@ -33,17 +49,31 @@ async function perform(req: SerializeRequest) {
   globalThis.HTMLElement = HTMLElement
 
   customElements.define.bind(customElements)
-  document.body.setAttribute('data-ssr', '')
 
-  for (const path of req.importPaths) {
+  const ssrScripts = Array.from(document.querySelectorAll('script[data-ssr]'))
+  const importPaths = ssrScripts.map(s => (s as HTMLScriptElement).src)
+
+  for (const path of importPaths) {
     await import(path)
   }
 
-  for (const string of serializer(document.body)) {
-    const out: Output = { string, isComplete: false }
-    postMessage(out)
+  document.body.setAttribute('data-ssr', '')
+
+  let outputNode = document.documentElement
+
+  if (isElement) {
+    outputNode = document.body.firstElementChild
+  } else {
+    push({ string: '<!DOCTYPE html>\n', isComplete: false })
   }
 
-  const out: Output = { isComplete: true }
+  for (const string of serializer(outputNode)) {
+    push({ string, isComplete: false })
+  }
+
+  push({ isComplete: true })
+}
+
+function push(out: Output): void {
   postMessage(out)
 }

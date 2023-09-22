@@ -1,7 +1,6 @@
-export type SerializeRequest = {
-  body: string
-  importPaths: string[]
-}
+export type SerializeRequest =
+  | { page: string }
+  | { element: string }
 
 export type Output = {
   string: string
