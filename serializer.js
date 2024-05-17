@@ -71,6 +71,8 @@ export function* serializer(node, opts = {}) {
       yield* serializer(child, closedRootsMap)
     } else if (child.nodeType === 3) {
       yield child.nodeValue
+    } else if (child.nodeType === 8) {
+      /* no op */
     } else {
       throw new Error(`Don't support node type ${child.nodeType} yet`)
     }
